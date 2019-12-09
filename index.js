@@ -68,7 +68,9 @@ class NetworkContract extends BaseContract {
 	}
 
 	onError(code, message) {
-		throw Error('implementation is required');
+		const err = Error(message);
+		err.code = code;
+		throw err;
 	}
 }
 
