@@ -1,0 +1,1 @@
+# node-chaincode-insurance-network-common
