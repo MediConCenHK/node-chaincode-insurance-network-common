@@ -6,7 +6,7 @@ const keyDeployment = 'deployment';
 class NetworkContract extends BaseContract {
 
 	async init(context, certs) {
-		super.init(context);
+		await super.init(context);
 		const {stub} = context;
 
 		if (certs) {
