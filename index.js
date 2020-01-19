@@ -1,4 +1,6 @@
 const BaseContract = require('khala-fabric-contract-api/baseContract');
+const ChaincodeStub = require('fabric-common-chaincode/ChaincodeStub');
+const ClientID = require('fabric-common-chaincode/CID');
 const keyCertPemInsurance = 'certPemInsurance';
 const keyCertPemNetwork = 'certPemNetwork';
 const keyDeployment = 'deployment';
@@ -7,7 +9,7 @@ class NetworkContract extends BaseContract {
 
 	async init(context, certs) {
 		await super.init(context);
-		const {stub} = context;
+		const stub = new ChaincodeStub(context.stub);
 
 		if (certs) {
 			const {CertPemInsurance, CertPemNetwork} = JSON.parse(certs);
@@ -20,18 +22,19 @@ class NetworkContract extends BaseContract {
 		}
 	}
 
-	async certRotate({stub}, certType, newPem) {
+	async certRotate(context, certType, newPem) {
+		const stub = new ChaincodeStub(context.stub);
 		let oldPem;
 		switch (certType) {
 			case 'insurance':
 				oldPem = await stub.getState(keyCertPemInsurance);
-				this._verifyCreatorIdentity({stub}, oldPem.toString());
+				this._verifyCreatorIdentity(stub.stub, oldPem);
 				await stub.putState(keyCertPemInsurance, newPem);
 
 				break;
 			case 'network':
 				oldPem = await stub.getState(keyCertPemNetwork);
-				this._verifyCreatorIdentity({stub}, oldPem.toString());
+				this._verifyCreatorIdentity(stub.stub, oldPem);
 				await stub.putState(keyCertPemNetwork, newPem);
 				break;
 			default:
@@ -39,17 +42,19 @@ class NetworkContract extends BaseContract {
 		}
 	}
 
-	async getStoredCerts({stub}) {
+	async getStoredCerts(context) {
+		const stub = new ChaincodeStub(context.stub);
 		const CertPemInsurance = await stub.getState(keyCertPemInsurance);
 		const CertPemNetwork = await stub.getState(keyCertPemNetwork);
 		return {
-			CertPemInsurance: CertPemInsurance.toString(),
-			CertPemNetwork: CertPemNetwork.toString()
+			CertPemInsurance,
+			CertPemNetwork
 		};
 	}
 
-	_verifyCreatorIdentity({stub}, expectedCert) {
-		const creatorCert = stub.getCreator().id_bytes.toString('utf8');
+	_verifyCreatorIdentity(stub, expectedCert) {
+		const cid = new ClientID(stub);
+		const creatorCert = cid.getCertPem();
 
 		if (creatorCert !== expectedCert) {
 			this.logger.error('creatorCert', creatorCert);
@@ -62,9 +67,9 @@ class NetworkContract extends BaseContract {
 		await stub.putState(keyDeployment, newDeployment);
 	}
 
-	async getDeployment({stub}, newDeployment) {
-		const deployment = await stub.getState(keyDeployment);
-		return deployment.toString();
+	async getDeployment(context, newDeployment) {
+		const stub = new ChaincodeStub(context.stub);
+		return await stub.getState(keyDeployment);
 	}
 
 	onError(code, message) {
