@@ -1,6 +1,6 @@
 const BaseContract = require('khala-fabric-contract-api/baseContract');
 const ChaincodeStub = require('fabric-common-chaincode/ChaincodeStub');
-const ClientID = require('fabric-common-chaincode/CID');
+const ClientIdentity = require('fabric-common-chaincode/CID');
 const keyCertPemInsurance = 'certPemInsurance';
 const keyCertPemNetwork = 'certPemNetwork';
 const keyDeployment = 'deployment';
@@ -53,7 +53,7 @@ class NetworkContract extends BaseContract {
 	}
 
 	_verifyCreatorIdentity(stub, expectedCert) {
-		const cid = new ClientID(stub);
+		const cid = new ClientIdentity(stub);
 		const creatorCert = cid.getCertPem();
 
 		if (creatorCert !== expectedCert) {
@@ -79,4 +79,6 @@ class NetworkContract extends BaseContract {
 	}
 }
 
+NetworkContract.ChaincodeStub = ChaincodeStub;
+NetworkContract.ClientIdentity = ClientIdentity;
 module.exports = NetworkContract;
