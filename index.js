@@ -57,7 +57,7 @@ class NetworkContract extends BaseContract {
 	 *
 	 * @param {shim.ChaincodeStub} stub
 	 * @param {string} expectedCert
-	 * @private
+	 * @protected
 	 */
 	_verifyCreatorIdentity(stub, expectedCert) {
 		const cid = new ClientIdentity(stub);
@@ -70,7 +70,13 @@ class NetworkContract extends BaseContract {
 		}
 	}
 
-
+	/**
+	 *
+	 * @param {ChaincodeStub} stub
+	 * @param {string} token
+	 * @return {Promise<undefined|string>}
+	 * @protected
+	 */
 	async _getToken(stub, token) {
 		const FcnGetToken = 'getToken';
 
@@ -83,6 +89,14 @@ class NetworkContract extends BaseContract {
 		return JSON.parse(payload);
 	}
 
+	/**
+	 *
+	 * @param {ChaincodeStub} stub
+	 * @param {string} token
+	 * @param tokenTransferRequest
+	 * @return {Promise<void>}
+	 * @protected
+	 */
 	async _moveToken(stub, token, tokenTransferRequest) {
 		const FcnMoveToken = 'moveToken';
 		const args = [FcnMoveToken, token, JSON.stringify(tokenTransferRequest)];
@@ -90,6 +104,13 @@ class NetworkContract extends BaseContract {
 		await stub.invokeChaincode(GlobalCCID, args);
 	}
 
+	/**
+	 *
+	 * @param {ChaincodeStub} stub
+	 * @param {string} token
+	 * @return {Promise<void>}
+	 * @protected
+	 */
 	async _deleteToken(stub, token) {
 		const FcnDeleteToken = 'deleteToken';
 		const args = [FcnDeleteToken, token];
