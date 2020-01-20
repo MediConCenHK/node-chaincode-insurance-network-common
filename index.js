@@ -4,6 +4,7 @@ const ClientIdentity = require('fabric-common-chaincode/CID');
 const keyCertPemInsurance = 'certPemInsurance';
 const keyCertPemNetwork = 'certPemNetwork';
 const keyDeployment = 'deployment';
+const GlobalCCID = 'global';
 
 class NetworkContract extends BaseContract {
 
@@ -52,6 +53,12 @@ class NetworkContract extends BaseContract {
 		};
 	}
 
+	/**
+	 *
+	 * @param {shim.ChaincodeStub} stub
+	 * @param {string} expectedCert
+	 * @private
+	 */
 	_verifyCreatorIdentity(stub, expectedCert) {
 		const cid = new ClientIdentity(stub);
 		const creatorCert = cid.getCertPem();
@@ -63,11 +70,31 @@ class NetworkContract extends BaseContract {
 		}
 	}
 
+
+	async _getToken(stub, token) {
+		const FcnGetToken = 'getToken';
+
+		const args = [FcnGetToken, token];
+		const {payload} = await stub.invokeChaincode(GlobalCCID, args);
+
+		if (!payload) {
+			return;
+		}
+		return JSON.parse(payload);
+	}
+
+	async _moveToken(stub, token, tokenTransferRequest) {
+		const FcnMoveToken = 'moveToken';
+		const args = [FcnMoveToken, token, JSON.stringify(tokenTransferRequest)];
+
+		await stub.invokeChaincode(GlobalCCID, args);
+	}
+
 	async setDeployment({stub}, newDeployment) {
 		await stub.putState(keyDeployment, newDeployment);
 	}
 
-	async getDeployment(context, newDeployment) {
+	async getDeployment(context) {
 		const stub = new ChaincodeStub(context.stub);
 		return await stub.getState(keyDeployment);
 	}
