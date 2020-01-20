@@ -90,6 +90,12 @@ class NetworkContract extends BaseContract {
 		await stub.invokeChaincode(GlobalCCID, args);
 	}
 
+	async _deleteToken(stub, token) {
+		const FcnDeleteToken = 'deleteToken';
+		const args = [FcnDeleteToken, token];
+		await stub.invokeChaincode(GlobalCCID, args);
+	}
+
 	async setDeployment({stub}, newDeployment) {
 		await stub.putState(keyDeployment, newDeployment);
 	}
