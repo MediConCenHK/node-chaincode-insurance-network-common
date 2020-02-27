@@ -1,19 +1,18 @@
-const BaseContract = require('khala-fabric-contract-api/baseContract');
 const ChaincodeStub = require('fabric-common-chaincode/ChaincodeStub');
 const ClientIdentity = require('fabric-common-chaincode/CID');
+const CommonChaincode = require('fabric-common-chaincode/base');
+
 const keyCertPemInsurance = 'certPemInsurance';
 const keyCertPemNetwork = 'certPemNetwork';
 const keyDeployment = 'deployment';
 const GlobalCCID = 'global';
 
-class NetworkContract extends BaseContract {
+class NetworkContract extends CommonChaincode {
 
-	async init(context, certs) {
-		await super.init(context);
-		const stub = new ChaincodeStub(context.stub);
-
-		if (certs) {
-			const {CertPemInsurance, CertPemNetwork} = JSON.parse(certs);
+	async init(stub) {
+		const [fcn, params] = stub.getFunctionAndParameters();
+		if (params[0]) {
+			const {CertPemInsurance, CertPemNetwork} = JSON.parse(params[0]);
 			await stub.putState(keyCertPemInsurance, CertPemInsurance);
 			await stub.putState(keyCertPemNetwork, CertPemNetwork);
 		}
@@ -23,8 +22,7 @@ class NetworkContract extends BaseContract {
 		}
 	}
 
-	async certRotate(context, certType, newPem) {
-		const stub = new ChaincodeStub(context.stub);
+	async certRotate(stub, certType, newPem) {
 		let oldPem;
 		switch (certType) {
 			case 'insurance':
@@ -43,8 +41,7 @@ class NetworkContract extends BaseContract {
 		}
 	}
 
-	async getStoredCerts(context) {
-		const stub = new ChaincodeStub(context.stub);
+	async getStoredCerts(stub) {
 		const CertPemInsurance = await stub.getState(keyCertPemInsurance);
 		const CertPemNetwork = await stub.getState(keyCertPemNetwork);
 		return {
@@ -66,7 +63,7 @@ class NetworkContract extends BaseContract {
 		if (creatorCert !== expectedCert) {
 			this.logger.error('creatorCert', creatorCert);
 			this.logger.error('expectedCert', expectedCert);
-			this.onError('verifyCreatorIdentity', `tx creator's identity is not as expected`);
+			throw Error(`tx creator's identity is not as expected`);
 		}
 	}
 
@@ -117,22 +114,13 @@ class NetworkContract extends BaseContract {
 		await stub.invokeChaincode(GlobalCCID, args);
 	}
 
-	async setDeployment({stub}, newDeployment) {
+	async setDeployment(stub, newDeployment) {
 		await stub.putState(keyDeployment, newDeployment);
 	}
 
-	async getDeployment(context) {
-		const stub = new ChaincodeStub(context.stub);
+	async getDeployment(stub) {
 		return await stub.getState(keyDeployment);
-	}
-
-	onError(code, message) {
-		const err = Error(message);
-		err.code = code;
-		throw err;
 	}
 }
 
-NetworkContract.ChaincodeStub = ChaincodeStub;
-NetworkContract.ClientIdentity = ClientIdentity;
 module.exports = NetworkContract;

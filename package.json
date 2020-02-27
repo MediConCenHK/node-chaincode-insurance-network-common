@@ -1,8 +1,7 @@
 {
   "name": "node-chaincode-insurance-network-common",
-  "version": "0.1.5",
+  "version": "0.2.1",
   "dependencies": {
-    "khala-fabric-contract-api": "^1.4.4-0.0.0",
-    "fabric-common-chaincode": "^1.4.4-0.1.10"
+    "fabric-common-chaincode": "^1.4.5-0.1.0"
   }
 }
