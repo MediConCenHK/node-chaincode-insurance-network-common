@@ -3,7 +3,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "node-chaincode-insurance-network-common": "^0.2.1",
+    "node-chaincode-insurance-network-common": "^0.2.4",
     "fabric-shim": "^1.4.5"
   }
 }

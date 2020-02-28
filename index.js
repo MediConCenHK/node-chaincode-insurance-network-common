@@ -10,7 +10,7 @@ const GlobalCCID = 'global';
 class NetworkContract extends CommonChaincode {
 
 	async init(stub) {
-		const [fcn, params] = stub.getFunctionAndParameters();
+		const {params} = stub.getFunctionAndParameters();
 		if (params[0]) {
 			const {CertPemInsurance, CertPemNetwork} = JSON.parse(params[0]);
 			await stub.putState(keyCertPemInsurance, CertPemInsurance);
